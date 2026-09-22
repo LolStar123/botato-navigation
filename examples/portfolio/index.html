@@ -1,1 +1,119 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>botato / route lab</title><link rel="stylesheet" href="style.css"><body><header><a href="https://poetato.app">poetato / botato</a><a href="https://github.com/LolStar123/botato-navigation">source code</a></header><main><div class="intro"><div><p class="eyebrow">terrain navigation</p><h1>a way through.</h1></div><p>Click a destination. Draw a wall across the route. Watch the little traveller find another way.</p></div><div class="toolbar"><label>terrain<select id="map"><option value="quarry">the quarry</option><option value="ravine">the ravine</option><option value="ruins">the ruins</option></select></label><fieldset><legend>click or drag to</legend><button data-tool="goal" aria-pressed="true">set destination</button><button data-tool="wall" aria-pressed="false">draw rocks</button><button data-tool="erase" aria-pressed="false">erase</button></fieldset><label>wall clearance <input id="clearance" type="range" min="0" max="7" value="3"><output id="clearance-value">3 cells</output></label><label class="check"><input id="explored" type="checkbox">show search</label></div><div class="terrain"><canvas id="world" width="960" height="600" tabindex="0" aria-label="Interactive terrain. Click to set a destination. Arrow keys move the destination; Enter replans."></canvas><div class="legend"><span>solid rock</span><span>planned route</span><span>red cap = our traveller</span></div></div><div class="below"><p id="status" role="status"></p><div><button id="pause">pause walk</button><button id="reset">reset terrain</button><button id="export">export route JSON</button></div></div><section class="metrics"><div><span>route length</span><strong id="distance"></strong></div><div><span>search expanded</span><strong id="nodes"></strong></div><div><span>turn points after smoothing</span><strong id="turns"></strong></div><div><span>last calculation</span><strong id="timing"></strong></div></section><details><summary>what Botato is doing</summary><p>Botato reads walkable terrain, searches for a route and keeps space between the character and walls. If the terrain changes, it plans again before continuing. The browser runs the same three-stage approach: a wall-distance field, eight-direction A* with a clearance penalty, and collision-checked route smoothing.</p><p>These three terrains are authored examples, not captured game maps. The public reference folder contains the original C# router and smoother. This sandbox needs no game process or account.</p></details><footer>Keyboard: focus the terrain, use arrows to move the destination, then Enter. Drawing replaces the route immediately. Clearance is a route preference; it is not a guarantee that every narrow passage meets that margin.</footer></main><script type="module" src="app.mjs"></script></body></html>
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" /><meta
+        name="viewport"
+        content="width=device-width,initial-scale=1"
+    /><title>botato / route lab</title
+    ><link rel="stylesheet" href="style.css" />
+    <body>
+        <header>
+            <a href="https://poetato.app">poetato / botato</a
+            ><a href="https://github.com/LolStar123/botato-navigation"
+                >source code</a
+            >
+        </header>
+        <main>
+            <div class="intro">
+                <div>
+                    <p class="eyebrow">terrain navigation</p>
+                    <h1>a way through.</h1>
+                </div>
+                <p>
+                    Click a destination. Draw a wall across the route. Watch the
+                    little traveller find another way.
+                </p>
+            </div>
+            <div class="toolbar">
+                <label
+                    >terrain<select id="map">
+                        <option value="quarry">the quarry</option>
+                        <option value="ravine">the ravine</option>
+                        <option value="ruins">the ruins</option>
+                    </select></label
+                >
+                <fieldset>
+                    <legend>click or drag to</legend>
+                    <button data-tool="goal" aria-pressed="true">
+                        set destination</button
+                    ><button data-tool="wall" aria-pressed="false">
+                        draw rocks</button
+                    ><button data-tool="erase" aria-pressed="false">
+                        erase
+                    </button>
+                </fieldset>
+                <label
+                    >wall clearance
+                    <input
+                        id="clearance"
+                        type="range"
+                        min="0"
+                        max="7"
+                        value="3"
+                    /><output id="clearance-value">3 cells</output></label
+                ><label class="check"
+                    ><input id="explored" type="checkbox" />show search</label
+                >
+            </div>
+            <div class="terrain">
+                <canvas
+                    id="world"
+                    width="960"
+                    height="600"
+                    tabindex="0"
+                    aria-label="Interactive terrain. Click to set a destination. Arrow keys move the destination; Enter replans."
+                ></canvas>
+                <div class="legend">
+                    <span>solid rock</span><span>planned route</span
+                    ><span>red cap = our traveller</span>
+                </div>
+            </div>
+            <div class="below">
+                <p id="status" role="status"></p>
+                <div>
+                    <button id="pause">pause walk</button
+                    ><button id="reset">reset terrain</button
+                    ><button id="export">export route JSON</button>
+                </div>
+            </div>
+            <section class="metrics">
+                <div>
+                    <span>route length</span><strong id="distance"></strong>
+                </div>
+                <div>
+                    <span>search expanded</span><strong id="nodes"></strong>
+                </div>
+                <div>
+                    <span>turn points after smoothing</span
+                    ><strong id="turns"></strong>
+                </div>
+                <div>
+                    <span>last calculation</span><strong id="timing"></strong>
+                </div>
+            </section>
+            <details>
+                <summary>what Botato is doing</summary>
+                <p>
+                    Botato reads walkable terrain, searches for a route and
+                    keeps space between the character and walls. If the terrain
+                    changes, it plans again before continuing. The browser runs
+                    the same three-stage approach: a wall-distance field,
+                    eight-direction A* with a clearance penalty, and
+                    collision-checked route smoothing.
+                </p>
+                <p>
+                    These three terrains are authored examples, not captured
+                    game maps. The public reference folder contains the original
+                    C# router and smoother. This sandbox needs no game process
+                    or account.
+                </p>
+            </details>
+            <footer>
+                Keyboard: focus the terrain, use arrows to move the destination,
+                then Enter. Drawing replaces the route immediately. Clearance is
+                a route preference; it is not a guarantee that every narrow
+                passage meets that margin.
+            </footer>
+        </main>
+        <script type="module" src="app.mjs"></script>
+    </body>
+</html>
