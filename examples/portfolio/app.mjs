@@ -17,7 +17,12 @@ let map,
     drag = false,
     last = 0,
     travel = 0,
-    drawDirty = true;
+    drawDirty = true,
+    enemies = [],
+    fighting = null,
+    attackClock = 0,
+    attackFlash = 0,
+    kills = 0;
 const center = (p) => [(p[0] + 0.5) * S, (p[1] + 0.5) * S];
 function updateGround() {
     g.fillStyle = "#202c29";
@@ -92,8 +97,24 @@ function plan() {
         goal: [...goal],
         blocked: map.blocked.size,
         reachable: !!result.path.length,
+        enemies: enemies.filter((enemy) => !enemy.dead).length,
+        kills,
+        mode: fighting ? "combat" : "pathing",
     };
     drawDirty = true;
+}
+function spawnEnemies() {
+    const path = result.raw.length ? result.raw : result.path;
+    enemies = [.28, .56, .82].map((fraction, id) => {
+        const point = path[Math.min(path.length - 1, Math.max(1, Math.floor(path.length * fraction)))] || goal;
+        return { id, x: point[0], y: point[1], hp: 3 + (id === 2 ? 1 : 0), maxHp: 3 + (id === 2 ? 1 : 0), dead: false };
+    });
+    fighting = null;
+    attackClock = 0;
+    attackFlash = 0;
+    kills = 0;
+    drawDirty = true;
+    if (window.__botato) Object.assign(window.__botato, { enemies: enemies.length, kills, mode: "pathing" });
 }
 function reset() {
     map = makeMap($("#map").value);
@@ -102,11 +123,12 @@ function reset() {
     travel = 0;
     updateGround();
     plan();
+    spawnEnemies();
 }
-function meowl(x, y, t, moving) {
+function meowl(x, y, t, moving, combat) {
     ctx.save();
     ctx.translate(x, y);
-    const bob = moving ? Math.sin(t * 13) * 1.5 : Math.sin(t * 2) * 0.6;
+    const bob = combat ? Math.sin(t * 24) * 1.2 : moving ? Math.sin(t * 13) * 1.5 : Math.sin(t * 2) * 0.6;
     ctx.translate(0, bob);
     ctx.lineWidth = 1.6;
     ctx.strokeStyle = "#171f1c";
@@ -138,7 +160,7 @@ function meowl(x, y, t, moving) {
         ctx.fill();
         ctx.fillStyle = "#d4d4ba";
         ctx.beginPath();
-        const foot = moving ? Math.sin(t * 13 + sign) * 2 : 0;
+        const foot = combat ? Math.sin(t * 25 + sign) * 1.4 : moving ? Math.sin(t * 13 + sign) * 2 : 0;
         ctx.moveTo(sign * 5, 8);
         ctx.lineTo(sign * 8, 12 + foot);
         ctx.lineTo(sign * 3, 12 + foot);
@@ -165,6 +187,24 @@ function meowl(x, y, t, moving) {
     ctx.moveTo(-14, -20);
     ctx.quadraticCurveTo(0, -18, 13, -22);
     ctx.stroke();
+    if (combat) {
+        ctx.strokeStyle = "#ddc894";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(combat.x * S - x, combat.y * S - y, 14 + attackFlash * 7, -1.2, 1.2);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+function drawEnemy(enemy, t) {
+    if (enemy.dead) return;
+    const [x, y] = center([enemy.x, enemy.y]), pulse = Math.sin(t * 5 + enemy.id) * 1.2;
+    ctx.save();ctx.translate(x, y + pulse);
+    ctx.fillStyle = enemy === fighting ? "#c96e63" : "#975c59";
+    ctx.strokeStyle = "#e0a188";ctx.lineWidth = 1.5;
+    ctx.beginPath();ctx.moveTo(-9, 6);ctx.quadraticCurveTo(-13, -6, -5, -11);ctx.lineTo(-9, -18);ctx.lineTo(0, -13);ctx.lineTo(9, -18);ctx.lineTo(6, -10);ctx.quadraticCurveTo(14, -4, 9, 7);ctx.quadraticCurveTo(0, 12, -9, 6);ctx.fill();ctx.stroke();
+    ctx.fillStyle = "#171f1c";ctx.beginPath();ctx.arc(-4,-4,1.5,0,Math.PI*2);ctx.arc(4,-4,1.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle = "#2a302c";ctx.fillRect(-12,12,24,3);ctx.fillStyle="#d6b879";ctx.fillRect(-12,12,24*enemy.hp/enemy.maxHp,3);
     ctx.restore();
 }
 function draw(t, moving) {
@@ -196,19 +236,40 @@ function draw(t, moving) {
     ctx.moveTo(gx, gy - 13);
     ctx.lineTo(gx, gy + 13);
     ctx.stroke();
-    meowl(...center(actor), t, moving);
+    for (const enemy of enemies) drawEnemy(enemy, t);
+    if (fighting) {
+        const [ax, ay] = center(actor), [ex, ey] = center([fighting.x, fighting.y]);
+        ctx.strokeStyle = `rgba(221,200,148,${.25 + attackFlash * .7})`;ctx.lineWidth = 2 + attackFlash * 3;
+        ctx.beginPath();ctx.moveTo(ax, ay - 7);ctx.quadraticCurveTo((ax + ex) / 2, Math.min(ay, ey) - 25 - attackFlash * 8, ex, ey - 5);ctx.stroke();
+        ctx.fillStyle = "#ddc894";ctx.font = "700 11px Consolas,monospace";ctx.textAlign = "center";ctx.fillText("AUTO-FIGHT", ax, ay - 38);
+    }
+    meowl(...center(actor), t, moving, fighting);
 }
 function frame(time) {
     const dt = Math.min(0.04, (time - last) / 1000 || 0);
     last = time;
     let moving = false;
+    attackFlash = Math.max(0, attackFlash - dt * 5);
     if (
         !document.hidden &&
         !paused &&
         result?.path.length &&
         index < result.path.length
     ) {
-        let budget = dt * 8;
+        fighting = enemies.find((enemy) => !enemy.dead && Math.hypot(enemy.x - actor[0], enemy.y - actor[1]) <= 6) || null;
+        if (fighting) {
+            attackClock += dt;
+            if (attackClock >= .42) {
+                attackClock -= .42;
+                fighting.hp -= 1;
+                attackFlash = 1;
+                if (fighting.hp <= 0) {
+                    fighting.dead = true;kills += 1;fighting = null;
+                    $("#status").textContent = "Enemy cleared. Resuming the route.";
+                } else $("#status").textContent = "Enemy in range. Auto-fighting.";
+            }
+        }
+        let budget = fighting ? 0 : dt * 8;
         while (budget > 0 && index < result.path.length) {
             const target = result.path[index],
                 dx = target[0] - actor[0],
@@ -232,6 +293,7 @@ function frame(time) {
             $("#status").textContent =
                 "Destination reached. Pick another, or redraw the terrain.";
         window.__botato.actor = [...actor];
+        Object.assign(window.__botato, { enemies: enemies.filter((enemy) => !enemy.dead).length, kills, mode: fighting ? "combat" : "pathing" });
     }
     if (!document.hidden && (moving || drawDirty || !paused)) {
         draw(time / 1000, moving);
@@ -315,6 +377,8 @@ $("#export").onclick = () => {
         expanded: result.visited.length,
         cost: result.cost,
         clearance: Number($("#clearance").value),
+        enemies,
+        kills,
     };
     const url = URL.createObjectURL(
         new Blob([JSON.stringify(output, null, 2)], {

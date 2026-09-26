@@ -18,8 +18,10 @@ try:
         page.goto(os.environ.get('AUDIT_URL',f'http://127.0.0.1:{server.server_port}'),wait_until='networkidle')
         page.wait_for_function('window.__botato?.ready')
         assert page.evaluate('__botato.reachable')
+        assert page.evaluate('__botato.enemies')==3
         initial=page.evaluate('__botato.actor')
         page.wait_for_function('Math.hypot(__botato.actor[0]-5,__botato.actor[1]-25)>.5')
+        page.wait_for_function('__botato.kills>=1',timeout=12000)
         page.locator('#pause').click()
         for name in ['ravine','ruins','quarry']:
             page.locator('#map').select_option(name)
@@ -49,6 +51,6 @@ try:
         page.set_viewport_size({'width':390,'height':844})
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'mobile overflow'
         assert not errors,errors
-        print('PASS: moving agent, three maps, obstacle edits, unreachable state, reroute, keyboard and export')
+        print('PASS: route movement, auto-combat, three maps, obstacle edits, reroute, keyboard and export')
         browser.close()
 finally: server.shutdown()

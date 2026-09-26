@@ -1,9 +1,9 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>botato / route lab</title><link rel="stylesheet" href="style.css"></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>botato / route lab</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="identity.css"></head><body>
 <header><a href="https://lolstar123.github.io/just-a-little-further/">atul / botato</a><a href="https://github.com/LolStar123/botato-navigation">source</a></header>
 <main>
-<section class="hero"><p>terrain pathfinding</p><h1>click somewhere.<br><em>watch him figure it out.</em></h1></section>
+<section class="hero"><p>route + combat automation</p><h1>destination set. automation takes over.</h1></section>
 <section class="toolbar"><label>map<select id="map"><option value="quarry">quarry</option><option value="ravine">ravine</option><option value="ruins">ruins</option></select></label><fieldset><legend>tool</legend><button data-tool="goal" aria-pressed="true">destination</button><button data-tool="wall" aria-pressed="false">add rock</button><button data-tool="erase" aria-pressed="false">erase</button></fieldset></section>
-<canvas id="world" width="960" height="600" tabindex="0" aria-label="Interactive terrain. Click to set a destination."></canvas>
+<canvas id="world" width="960" height="600" tabindex="0" aria-label="Interactive terrain with route planning and enemies that are fought automatically in range. Click to set a destination."></canvas>
 <div class="below"><p id="status" role="status"></p><button id="pause">pause</button><button id="reset">reset</button></div>
 <details><summary>route settings</summary><label>wall clearance <input id="clearance" type="range" min="0" max="7" value="3"><output id="clearance-value">3 cells</output></label><label><input id="explored" type="checkbox"> show search</label><button id="export">export route</button></details>
 <div class="metrics" hidden><strong id="distance"></strong><strong id="nodes"></strong><strong id="turns"></strong><strong id="timing"></strong></div>
