@@ -35,6 +35,7 @@ try:
         page.locator('[data-tool="erase"]').click()
         page.mouse.click(box['x']+box['width']*.94,box['y']+box['height']*.49)
         assert page.evaluate('__botato.reachable')
+        page.locator('details summary').click()
         page.locator('#clearance').fill('6');page.locator('#clearance').dispatch_event('input')
         page.locator('#explored').check()
         with page.expect_download() as dl:page.locator('#export').click()
