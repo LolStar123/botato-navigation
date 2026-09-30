@@ -22,8 +22,14 @@ let map,
     fighting = null,
     attackClock = 0,
     attackFlash = 0,
-    kills = 0;
+    kills = 0,
+    displayedEnemyCount = -1;
 const center = (p) => [(p[0] + 0.5) * S, (p[1] + 0.5) * S];
+function setEnemyCount(count) {
+    if (count === displayedEnemyCount) return;
+    displayedEnemyCount = count;
+    $("#enemy-count").textContent = count;
+}
 function updateGround() {
     g.fillStyle = "#202c29";
     g.fillRect(0, 0, 960, 600);
@@ -84,8 +90,8 @@ function plan() {
     $("#distance").textContent = distance.toFixed(1) + " cells";
     $("#nodes").textContent = result.visited.length;
     $("#turns").textContent = Math.max(0, result.path.length - 2);
-    $("#timing").textContent = elapsed.toFixed(1) + " ms";
-    $("#enemy-count").textContent = enemies.filter((enemy) => !enemy.dead).length;
+    $("#timing").textContent = elapsed.toFixed(1);
+    setEnemyCount(enemies.filter((enemy) => !enemy.dead).length);
     $("#clearance-value").textContent = $("#clearance").value + " cells";
     $("#status").textContent = result.path.length
         ? "Route found. Following a collision-checked path."
@@ -115,7 +121,7 @@ function spawnEnemies() {
     attackFlash = 0;
     kills = 0;
     drawDirty = true;
-    $("#enemy-count").textContent = enemies.length;
+    setEnemyCount(enemies.length);
     if (window.__botato) Object.assign(window.__botato, { enemies: enemies.length, kills, mode: "pathing" });
 }
 function reset() {
@@ -303,7 +309,7 @@ function frame(time) {
                 "Destination reached. Pick another, or redraw the terrain.";
         window.__botato.actor = [...actor];
         const remaining = enemies.filter((enemy) => !enemy.dead).length;
-        $("#enemy-count").textContent = remaining;
+        setEnemyCount(remaining);
         Object.assign(window.__botato, { enemies: remaining, kills, mode: fighting ? "combat" : "pathing" });
     }
     if (!document.hidden && (moving || drawDirty || !paused)) {
@@ -333,14 +339,21 @@ function act(e) {
 }
 canvas.onpointerdown = (e) => {
     canvas.setPointerCapture(e.pointerId);
+    canvas.focus({ preventScroll: true });
     drag = true;
     act(e);
 };
 canvas.onpointermove = (e) => {
     if (drag && tool !== "goal") act(e);
 };
-canvas.onpointerup = () => (drag = false);
-canvas.onpointercancel = () => (drag = false);
+function endDrag(e) {
+    drag = false;
+    if (e?.pointerId !== undefined && canvas.hasPointerCapture(e.pointerId))
+        canvas.releasePointerCapture(e.pointerId);
+}
+canvas.onpointerup = endDrag;
+canvas.onpointercancel = endDrag;
+canvas.onlostpointercapture = () => (drag = false);
 canvas.onkeydown = (e) => {
     const d = {
         ArrowLeft: [-1, 0],
