@@ -85,6 +85,7 @@ function plan() {
     $("#nodes").textContent = result.visited.length;
     $("#turns").textContent = Math.max(0, result.path.length - 2);
     $("#timing").textContent = elapsed.toFixed(1) + " ms";
+    $("#enemy-count").textContent = enemies.filter((enemy) => !enemy.dead).length;
     $("#clearance-value").textContent = $("#clearance").value + " cells";
     $("#status").textContent = result.path.length
         ? "Route found. Following a collision-checked path."
@@ -114,6 +115,7 @@ function spawnEnemies() {
     attackFlash = 0;
     kills = 0;
     drawDirty = true;
+    $("#enemy-count").textContent = enemies.length;
     if (window.__botato) Object.assign(window.__botato, { enemies: enemies.length, kills, mode: "pathing" });
 }
 function reset() {
@@ -239,6 +241,13 @@ function draw(t, moving) {
     for (const enemy of enemies) drawEnemy(enemy, t);
     if (fighting) {
         const [ax, ay] = center(actor), [ex, ey] = center([fighting.x, fighting.y]);
+        ctx.strokeStyle = "rgba(221,200,148,.28)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 5]);
+        ctx.beginPath();
+        ctx.arc(ax, ay, 6 * S, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
         ctx.strokeStyle = `rgba(221,200,148,${.25 + attackFlash * .7})`;ctx.lineWidth = 2 + attackFlash * 3;
         ctx.beginPath();ctx.moveTo(ax, ay - 7);ctx.quadraticCurveTo((ax + ex) / 2, Math.min(ay, ey) - 25 - attackFlash * 8, ex, ey - 5);ctx.stroke();
         ctx.fillStyle = "#ddc894";ctx.font = "700 11px Consolas,monospace";ctx.textAlign = "center";ctx.fillText("AUTO-FIGHT", ax, ay - 38);
@@ -293,7 +302,9 @@ function frame(time) {
             $("#status").textContent =
                 "Destination reached. Pick another, or redraw the terrain.";
         window.__botato.actor = [...actor];
-        Object.assign(window.__botato, { enemies: enemies.filter((enemy) => !enemy.dead).length, kills, mode: fighting ? "combat" : "pathing" });
+        const remaining = enemies.filter((enemy) => !enemy.dead).length;
+        $("#enemy-count").textContent = remaining;
+        Object.assign(window.__botato, { enemies: remaining, kills, mode: fighting ? "combat" : "pathing" });
     }
     if (!document.hidden && (moving || drawDirty || !paused)) {
         draw(time / 1000, moving);
