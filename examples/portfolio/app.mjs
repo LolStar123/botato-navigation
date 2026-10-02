@@ -95,7 +95,7 @@ function plan() {
     setEnemyCount(enemies.filter((enemy) => !enemy.dead).length);
     $("#clearance-value").textContent = $("#clearance").value + " cells";
     $("#status").textContent = result.path.length
-        ? "Route found. Following a collision-checked path."
+        ? "Following route"
         : "No route. Erase a blockage or choose an open destination.";
     window.__botato = {
         ready: true,
@@ -283,8 +283,8 @@ function frame(time) {
                 if (fighting.hp <= 0) {
                     fighting.dead = true;kills += 1;fighting = null;
                     $("#kills").textContent = kills;
-                    $("#status").textContent = "Enemy cleared. Resuming the route.";
-                } else $("#status").textContent = "Enemy in range. Auto-fighting.";
+                    $("#status").textContent = "Enemy cleared";
+                } else $("#status").textContent = "Fighting";
             }
         }
         let budget = fighting ? 0 : dt * 8;
@@ -309,7 +309,7 @@ function frame(time) {
         }
         if (index === result.path.length)
             $("#status").textContent =
-                "Destination reached. Pick another, or redraw the terrain.";
+                "Destination reached";
         window.__botato.actor = [...actor];
         const remaining = enemies.filter((enemy) => !enemy.dead).length;
         setEnemyCount(remaining);
@@ -394,7 +394,7 @@ $("#clearance").oninput = plan;
 $("#explored").onchange = () => (drawDirty = true);
 $("#pause").onclick = () => {
     paused = !paused;
-    $("#pause").textContent = paused ? "resume walk" : "pause walk";
+    $("#pause").textContent = paused ? "resume" : "pause";
     drawDirty = true;
 };
 $("#export").onclick = () => {

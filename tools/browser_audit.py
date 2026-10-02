@@ -66,9 +66,9 @@ try:
         page.locator('#world').focus();page.keyboard.press('Enter')
         assert page.evaluate('__botato.reachable')
         page.locator('#world').focus();page.keyboard.press('Space')
-        assert page.locator('#pause').inner_text()=='pause walk'
+        assert page.locator('#pause').inner_text()=='pause'
         page.keyboard.press('Space')
-        assert page.locator('#pause').inner_text()=='resume walk'
+        assert page.locator('#pause').inner_text()=='resume'
         assert not errors,errors
         print('PASS: route movement, auto-combat, three maps, obstacle edits, reroute, keyboard and export')
         browser.close()
