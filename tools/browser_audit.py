@@ -6,6 +6,8 @@ import threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
+QA=ROOT/'output/qa'
+QA.mkdir(parents=True,exist_ok=True)
 class Quiet(http.server.SimpleHTTPRequestHandler):
     def log_message(self,*args): pass
 server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=str(ROOT/'examples/portfolio')))
@@ -48,8 +50,25 @@ try:
         page.locator('[data-tool="goal"]').click()
         page.evaluate('window.scrollTo(0,0)')
         page.screenshot(path=str(ROOT/'examples/portfolio/preview.png'))
+        page.screenshot(path=str(QA/'desktop.png'),full_page=True)
         page.set_viewport_size({'width':390,'height':844})
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'mobile overflow'
+        page.screenshot(path=str(QA/'mobile.png'),full_page=True)
+        page.locator('#world').focus();page.keyboard.press('ArrowLeft')
+        assert page.locator('#world').evaluate('(el)=>getComputedStyle(el).outlineWidth')=='2px'
+        before=page.evaluate('__botato.blocked')
+        page.locator('[data-tool="wall"]').click()
+        page.locator('#world').focus();page.keyboard.press('Enter')
+        assert page.evaluate('__botato.blocked')>before
+        assert not page.evaluate('__botato.reachable')
+        page.screenshot(path=str(QA/'blocked-keyboard.png'),full_page=True)
+        page.locator('[data-tool="erase"]').click()
+        page.locator('#world').focus();page.keyboard.press('Enter')
+        assert page.evaluate('__botato.reachable')
+        page.locator('#world').focus();page.keyboard.press('Space')
+        assert page.locator('#pause').inner_text()=='pause walk'
+        page.keyboard.press('Space')
+        assert page.locator('#pause').inner_text()=='resume walk'
         assert not errors,errors
         print('PASS: route movement, auto-combat, three maps, obstacle edits, reroute, keyboard and export')
         browser.close()

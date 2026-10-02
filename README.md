@@ -1,31 +1,61 @@
-# botato route lab
+# Botato route lab
 
-**[Open the navigation sandbox](https://lolstar123.github.io/botato-navigation/)** | [poetato.app](https://poetato.app)
+[**Open the navigation sandbox**](https://lolstar123.github.io/botato-navigation/) ? [Desktop project](https://poetato.app)
 
-Botato plans movement through obstructed terrain. The public route lab lets you change that terrain while a little red-capped meowl follows its route.
+An editable navigation and combat simulation. Give a red-capped meowl a destination, draw obstacles in its way, and watch it recalculate its route. Enemies interrupt movement when they enter range; the meowl clears them and continues.
 
-![Botato route lab](examples/portfolio/preview.png)
+![Botato terrain and route](examples/portfolio/preview.png)
 
 ## Try it
 
-Click an open destination. Switch to **draw rocks** and drag across the path. The agent replans immediately; if you seal the route, it stops and says why. Erase a passage and it can continue. Try the quarry, ravine and ruins, change the preferred wall clearance, inspect the search area and export a complete route with its obstacle map.
+- Choose **quarry**, **ravine** or **ruins**, then tap an open destination.
+- Select **add rock** and drag across the route. Select **erase** to reopen a passage.
+- Seal the destination to see an unreachable state. The agent stops instead of following an invalid path.
+- Pause the simulation to edit the terrain at your own pace. Open **route settings** to change preferred wall clearance or show the search area.
+- Export the terrain, raw and smoothed routes, search result and current enemy state as JSON.
 
-## The actual navigation idea
+The map is keyboard accessible: arrow keys move the destination, Enter applies the selected destination/rock/erase tool, and Space pauses or resumes. The clearance is a preference, so a necessary narrow corridor can still be used.
 
-The [original C# router](reference/Pathfinder.cs) computes distance from walls, runs eight-direction A* with a penalty near them, then smooths the route with collision-checked shortcuts. The [original smoother](reference/PathSmoother.cs) also limits the cost increase from shortcuts.
+## How the route is built
 
-The browser implementation follows those stages on an 80 x 50 terrain. It rejects diagonal corner cuts and refuses blocked or unreachable destinations. A requested clearance is a preference, so a necessary narrow corridor can still be used. Its search metric and smoothing budget are visible in the source. The C# reference files depend on the full desktop project; they are source references, not a standalone build.
+The [original C# router](reference/Pathfinder.cs) combines distance from walls with eight-direction A*. The [original smoother](reference/PathSmoother.cs) checks proposed shortcuts for collisions and limits their additional cost.
 
-The maps are authored sandbox terrains, not exported game maps. The browser has no game-memory, account or input-control integration.
+The browser model follows the same stages on an **80 ? 50** authored terrain. It uses an orthogonal wall-distance field, a Euclidean search heuristic and a 3% smoothing-cost tolerance. Diagonal corner cuts are rejected. Changing occupancy triggers a new search before movement continues.
 
-## Run and test
+The enemy encounter loop is a public sandbox illustration of navigation feeding combat. It has three authored enemies, range checks, health and a clear/resume transition. It does not claim to reproduce every production combat decision. Neither the terrains nor the actors are exports from a running game.
+
+## Run locally
+
+Use Python 3 and a current browser. No application dependencies, account or build step are needed.
 
 ```sh
 python -m http.server 8000 --directory examples/portfolio
+```
+
+Open **http://localhost:8000** from this repository directory.
+
+## Checks
+
+```sh
 node --test examples/portfolio/model.test.mjs
-pip install playwright
+python -m pip install playwright
 python -m playwright install chromium
 python tools/browser_audit.py
 ```
 
-Open http://localhost:8000. [Routing and terrain](examples/portfolio/model.mjs), [interaction and movement](examples/portfolio/app.mjs), [provenance](PROVENANCE.md). Public browser checks run every four hours.
+Node checks collision-free routes on all maps, blocked and unreachable destinations, corner-cut prevention and occupancy edits. The isolated headless browser checks movement, automatic combat, map changes, draw/erase, keyboard editing, pause, export and a 390 px viewport. Reduced motion removes decorative bobbing while route movement remains visible. On Windows the audit uses installed Google Chrome; other platforms use Playwright Chromium.
+
+Screenshots are saved to ignored `output/qa/`; the README preview is refreshed by the audit. Search timings are measured in that browser run and are not performance promises.
+
+## Code map
+
+| File | Responsibility |
+| --- | --- |
+| [model.mjs](examples/portfolio/model.mjs) | Terrain, wall distance, A*, collision checks and smoothing |
+| [app.mjs](examples/portfolio/app.mjs) | Canvas drawing, terrain input, movement, combat and export |
+| [reference](reference) | Original C# navigation sources |
+| [browser_audit.py](tools/browser_audit.py) | Desktop/mobile flows and screenshot evidence |
+| [PROVENANCE.md](PROVENANCE.md) | Source relationship and sandbox boundaries |
+| [DESIGN.md](DESIGN.md) | Map-first design and accessibility decisions |
+
+The C# references depend on the full desktop project and are not a standalone build. This repository's browser has no game-memory, account or operating-system input integration.

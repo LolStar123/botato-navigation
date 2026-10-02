@@ -1,2 +1,12 @@
-/* route lab: the world is the interface, chrome stays close to it */
-body{font-family:"Trebuchet MS","Segoe UI",sans-serif}header{height:54px}main{padding:30px 0 42px}.hero{margin-bottom:18px}.hero h1{margin:0;font:800 38px/.94 "Trebuchet MS","Segoe UI",sans-serif;letter-spacing:-.035em}.toolbar{margin-bottom:9px;padding:8px 0;border-top:1px solid var(--line)}#world{border-color:#778574;box-shadow:inset 0 0 0 3px #17231f}.below{min-height:44px}.below p{font-family:ui-monospace,Consolas,monospace}summary{padding:11px 0}@media(max-width:650px){main{padding:26px 0 36px}.hero h1{font-size:34px}.toolbar{margin-top:19px}.toolbar select,.toolbar button,.below button,details button{min-height:44px}}
+/* The terrain and traveller supply the identity; controls stay close to the world. */
+body{font-family:"Trebuchet MS","Segoe UI",sans-serif}
+header{height:60px}main{padding:36px 0 42px}
+.hero{margin-bottom:24px}.hero .eyebrow{font:12px/1.4 Consolas,monospace;color:var(--gold);letter-spacing:.08em;margin:0 0 11px;text-transform:none}
+.hero h1{margin:0;font:800 clamp(32px,4.5vw,46px)/1.08 "Trebuchet MS","Segoe UI",sans-serif;letter-spacing:-.04em}
+.hero .intro{max-width:620px;margin:14px 0 0;font-size:15px;line-height:1.6;color:#afbbb3;text-transform:none;letter-spacing:0}
+.toolbar{margin-bottom:12px;padding:17px 0 0;border-top:1px solid var(--line);gap:16px}.toolbar label{display:flex;align-items:center;gap:10px}.toolbar legend{display:none}.toolbar select,.toolbar button,.below button,details button{min-height:44px}
+.map-frame{padding:7px;border:1px solid #5d6e61;background:#1b2823}#world{border:1px solid #34473a}
+.map-help{font-size:12px;color:#a7b6ad;margin:12px 0 5px;line-height:1.65;max-width:780px}
+.below{min-height:58px}.below p{font-family:Consolas,monospace;font-size:12px;line-height:1.6}.metrics span{padding:16px 24px 16px 0}.metrics strong{font-size:14px}.metrics small{font-size:10px}.metrics .map-legend{margin-left:auto;padding-right:0;gap:8px}.map-legend i{width:8px;height:8px;border:1px solid var(--gold);border-radius:50%}.map-legend .enemy-key{background:#975c59;border-color:#e0a188;border-radius:2px}
+summary{padding:16px 0;min-height:48px}footer{font-size:12px;color:var(--muted);margin-top:22px}button:hover:not(:disabled){border-color:var(--gold)}
+@media(max-width:650px){header,main{width:calc(100% - 28px)}main{padding:27px 0 34px}.hero{margin-bottom:20px}.hero h1{font-size:35px}.hero .intro{font-size:14px}.toolbar{margin-top:16px;gap:12px}.toolbar fieldset{margin-top:0;gap:6px}.toolbar button{font-size:13px}.map-frame{padding:4px}.below{padding-top:5px}.below p{margin:6px 0}.metrics{gap:0 10px}.metrics span{padding:14px 0}.metrics .map-legend{width:100%;margin:0;padding-top:0}details label{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:44px}details input[type=range]{max-width:180px}}

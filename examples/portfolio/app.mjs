@@ -25,6 +25,7 @@ let map,
     kills = 0,
     displayedEnemyCount = -1;
 const center = (p) => [(p[0] + 0.5) * S, (p[1] + 0.5) * S];
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 function setEnemyCount(count) {
     if (count === displayedEnemyCount) return;
     displayedEnemyCount = count;
@@ -120,6 +121,7 @@ function spawnEnemies() {
     attackClock = 0;
     attackFlash = 0;
     kills = 0;
+    $("#kills").textContent = kills;
     drawDirty = true;
     setEnemyCount(enemies.length);
     if (window.__botato) Object.assign(window.__botato, { enemies: enemies.length, kills, mode: "pathing" });
@@ -280,6 +282,7 @@ function frame(time) {
                 attackFlash = 1;
                 if (fighting.hp <= 0) {
                     fighting.dead = true;kills += 1;fighting = null;
+                    $("#kills").textContent = kills;
                     $("#status").textContent = "Enemy cleared. Resuming the route.";
                 } else $("#status").textContent = "Enemy in range. Auto-fighting.";
             }
@@ -313,7 +316,7 @@ function frame(time) {
         Object.assign(window.__botato, { enemies: remaining, kills, mode: fighting ? "combat" : "pathing" });
     }
     if (!document.hidden && (moving || drawDirty || !paused)) {
-        draw(time / 1000, moving);
+        draw(reducedMotion.matches ? 0 : time / 1000, moving);
         drawDirty = false;
     }
     requestAnimationFrame(frame);
@@ -322,6 +325,9 @@ function act(e) {
     const rect = canvas.getBoundingClientRect(),
         x = Math.floor(((e.clientX - rect.left) / rect.width) * W),
         y = Math.floor(((e.clientY - rect.top) / rect.height) * H);
+    useTool(x, y);
+}
+function useTool(x, y) {
     if (x < 1 || y < 1 || x >= W - 1 || y >= H - 1) return;
     if (tool === "goal") {
         goal = [x, y];
@@ -370,7 +376,10 @@ canvas.onkeydown = (e) => {
         plan();
     } else if (e.key === "Enter") {
         e.preventDefault();
-        plan();
+        useTool(...goal);
+    } else if (e.key === " ") {
+        e.preventDefault();
+        $("#pause").click();
     }
 };
 for (const b of document.querySelectorAll("[data-tool]"))
